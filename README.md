@@ -13,12 +13,10 @@
   HTML and CSS context—with a single click.
 </p>
 
-<p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=marcellm01.pinpoint"><img src="https://img.shields.io/visual-studio-marketplace/v/marcellm01.pinpoint?style=for-the-badge&logo=visualstudiocode&label=VS%20Code" alt="VS Code Marketplace version"></a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=marcellm01.pinpoint"><img src="https://img.shields.io/visual-studio-marketplace/i/marcellm01.pinpoint?style=for-the-badge&logo=visualstudiocode&label=Installs" alt="VS Code Marketplace installs"></a>
-  <a href="https://github.com/MarcellM01/Pinpoint/stargazers"><img src="https://img.shields.io/github/stars/MarcellM01/Pinpoint?style=for-the-badge&logo=github&label=Stars" alt="GitHub stars"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-22c55e?style=for-the-badge" alt="MIT License"></a>
-</p>
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/marcellm01.pinpoint?label=marketplace)](https://marketplace.visualstudio.com/items?itemName=marcellm01.pinpoint)
+[![VS Code Marketplace installs](https://img.shields.io/visual-studio-marketplace/i/marcellm01.pinpoint?label=installs)](https://marketplace.visualstudio.com/items?itemName=marcellm01.pinpoint)
+[![GitHub stars](https://img.shields.io/github/stars/MarcellM01/Pinpoint)](https://github.com/MarcellM01/Pinpoint/stargazers)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 <p align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=marcellm01.pinpoint"><strong>Install Pinpoint →</strong></a>
