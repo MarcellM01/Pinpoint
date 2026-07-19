@@ -1,8 +1,8 @@
 {
-  "name": "pinpoint",
-  "displayName": "Pinpoint - Copy Element for AI",
-  "description": "Pick an element in VS Code's Integrated Browser and capture its HTML + CSS context to a file, an @-mention lands on your clipboard, ready to paste into any AI chat.",
-  "version": "0.1.0",
+  "name": "tinysuite-pinpoint",
+  "displayName": "Pinpoint: Copy Frontend Context for AI",
+  "description": "Pick any frontend element in VS Code's Integrated Browser and capture its HTML and CSS context for AI coding agents.",
+  "version": "0.1.1",
   "publisher": "marcellm01",
   "license": "MIT",
   "icon": "resources/icon.png",
@@ -24,6 +24,7 @@
     "vscode": "^1.109.0"
   },
   "categories": [
+    "AI",
     "Other"
   ],
   "keywords": [
@@ -42,6 +43,12 @@
     "clipboard"
   ],
   "main": "./extension.js",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "Pinpoint attaches VS Code's JavaScript debugger to the Integrated Browser and writes capture reports to the workspace."
+    }
+  },
   "contributes": {
     "commands": [
       {
@@ -89,6 +96,8 @@
     "resources",
     "README.md",
     "CHANGELOG.md",
+    "SUPPORT.md",
+    "SECURITY.md",
     "LICENSE"
   ]
 }

@@ -13,12 +13,12 @@
   HTML and CSS context with a single click.
 </p>
 
-[![VS Marketplace Version](https://vsmarketplacebadges.dev/version-short/marcellm01.pinpoint.svg)](https://marketplace.visualstudio.com/items?itemName=marcellm01.pinpoint)
-[![VS Marketplace Installs](https://vsmarketplacebadges.dev/installs-short/marcellm01.pinpoint.svg)](https://marketplace.visualstudio.com/items?itemName=marcellm01.pinpoint)
+[![VS Marketplace Version](https://vsmarketplacebadges.dev/version-short/marcellm01.tinysuite-pinpoint.svg)](https://marketplace.visualstudio.com/items?itemName=marcellm01.tinysuite-pinpoint)
+[![VS Marketplace Installs](https://vsmarketplacebadges.dev/installs-short/marcellm01.tinysuite-pinpoint.svg)](https://marketplace.visualstudio.com/items?itemName=marcellm01.tinysuite-pinpoint)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 <p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=marcellm01.pinpoint"><strong>Install Pinpoint →</strong></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=marcellm01.tinysuite-pinpoint"><strong>Install Pinpoint →</strong></a>
 </p>
 
 <p align="center">
@@ -69,10 +69,10 @@ Reports are readable Markdown, not raw DevTools noise, and live inside the works
 
 ## Install
 
-Install **Pinpoint – Copy Element for AI** from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=marcellm01.pinpoint), or run:
+Install **Pinpoint: Copy Frontend Context for AI** from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=marcellm01.tinysuite-pinpoint), or run:
 
 ```bash
-code --install-extension marcellm01.pinpoint
+code --install-extension marcellm01.tinysuite-pinpoint
 ```
 
 ### Install from source
@@ -115,6 +115,16 @@ Each click creates a cleanly named report. Captures older than 24 hours are remo
 - **Local by design.** Pinpoint itself makes no network requests. Captures stay in your workspace and clipboard.
 - **Low-noise output.** Universal resets and unchanged browser defaults are filtered out.
 - **Fast cleanup.** Reports expire automatically after one day.
+
+## Security and privacy
+
+- **No telemetry or accounts.** Pinpoint does not collect usage data and does not require a sign-in.
+- **No network requests.** The extension does not send captured content anywhere.
+- **User initiated.** Pinpoint attaches VS Code's JavaScript debugger only after you click its inspect icon, injects the picker, and disconnects immediately.
+- **Local output.** Reports are written to `.pinpoint/` in your workspace and their `@` mentions are copied to your clipboard.
+- **Sensitive content stays your responsibility.** A report can contain text, attributes, URLs, and styles rendered by the selected element. Review captures before sharing them outside your machine.
+
+Read the [security policy](SECURITY.md) for vulnerability reporting and [support guide](SUPPORT.md) when something is not working.
 
 ## How it works
 
