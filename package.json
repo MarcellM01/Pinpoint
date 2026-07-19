@@ -1,0 +1,94 @@
+{
+  "name": "pinpoint",
+  "displayName": "Pinpoint - Copy Element for AI",
+  "description": "Pick an element in VS Code's Integrated Browser and capture its HTML + CSS context to a file, an @-mention lands on your clipboard, ready to paste into any AI chat.",
+  "version": "0.1.0",
+  "publisher": "marcellm01",
+  "license": "MIT",
+  "icon": "resources/icon.png",
+  "preview": true,
+  "pricing": "Free",
+  "galleryBanner": {
+    "color": "#1F2328",
+    "theme": "dark"
+  },
+  "homepage": "https://github.com/MarcellM01/Pinpoint",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MarcellM01/Pinpoint.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MarcellM01/Pinpoint/issues"
+  },
+  "engines": {
+    "vscode": "^1.109.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "agent",
+    "browser",
+    "codex",
+    "copilot",
+    "css",
+    "devtools",
+    "dom",
+    "element",
+    "frontend",
+    "html",
+    "selector",
+    "clipboard"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "pinpoint.pick",
+        "title": "Pinpoint: Pick Element",
+        "category": "Browser",
+        "enablement": "activeEditor == workbench.editor.browser",
+        "icon": {
+          "light": "resources/pick-light.svg",
+          "dark": "resources/pick-dark.svg"
+        }
+      },
+      {
+        "command": "pinpoint.stop",
+        "title": "Pinpoint: Stop Picking",
+        "category": "Browser",
+        "enablement": "activeEditor == workbench.editor.browser && pinpoint.armed",
+        "icon": "$(stop-circle)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "pinpoint.pick",
+          "group": "navigation@1",
+          "when": "activeEditor == workbench.editor.browser && !pinpoint.armed"
+        },
+        {
+          "command": "pinpoint.stop",
+          "group": "navigation@1",
+          "when": "activeEditor == workbench.editor.browser && pinpoint.armed"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "pinpoint.stop",
+          "when": "pinpoint.armed"
+        }
+      ]
+    }
+  },
+  "files": [
+    "extension.js",
+    "picker.js",
+    "resources",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ]
+}
