@@ -1,0 +1,43 @@
+name: Publish VS Code Extension
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-vscode-extension
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish extension
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify tag matches extension version
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          package_version="$(node -p "require('./package.json').version")"
+          if [[ "${GITHUB_REF_NAME}" != "v${package_version}" ]]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match package.json version ${package_version}."
+            exit 1
+          fi
+
+      - name: Publish to VS Code Extensions
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: npx --yes @vscode/vsce@latest publish --pat "$VSCE_PAT"

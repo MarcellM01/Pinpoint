@@ -10,12 +10,11 @@
 
 <p align="center">
   Turn any element in VS Code's Integrated Browser into clean, agent-readable<br>
-  HTML and CSS context—with a single click.
+  HTML and CSS context with a single click.
 </p>
 
-[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/marcellm01.pinpoint?label=marketplace)](https://marketplace.visualstudio.com/items?itemName=marcellm01.pinpoint)
-[![VS Code Marketplace installs](https://img.shields.io/visual-studio-marketplace/i/marcellm01.pinpoint?label=installs)](https://marketplace.visualstudio.com/items?itemName=marcellm01.pinpoint)
-[![GitHub stars](https://img.shields.io/github/stars/MarcellM01/Pinpoint)](https://github.com/MarcellM01/Pinpoint/stargazers)
+[![VS Marketplace Version](https://vsmarketplacebadges.dev/version-short/marcellm01.pinpoint.svg)](https://marketplace.visualstudio.com/items?itemName=marcellm01.pinpoint)
+[![VS Marketplace Installs](https://vsmarketplacebadges.dev/installs-short/marcellm01.pinpoint.svg)](https://marketplace.visualstudio.com/items?itemName=marcellm01.pinpoint)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 <p align="center">
@@ -25,6 +24,10 @@
 <p align="center">
   <img src="resources/pinpoint-demo.gif" width="960" alt="Pinpoint selecting an element in VS Code's Integrated Browser and pasting its context into an AI chat">
 </p>
+
+> **Built at TinySuite**
+>
+> Pinpoint comes from [TinySuite](https://tinysuite.dev/), the same team behind [TinySearch](https://github.com/MarcellM01/TinySearch). We built it for our own frontend and agent workflows, kept reaching for it, and decided it was too useful to keep private, so we open-sourced it.
 
 Your AI can read the code. It cannot see the element you are pointing at.
 
@@ -62,7 +65,7 @@ The agent gets the evidence it needs without a screenshot scavenger hunt, a wall
 | Resolved values                 | Sees what the browser computed, without hundreds of default properties |
 | CSS variables                   | Connects `var(--token)` references to their live values                |
 
-Reports are readable Markdown—not raw DevTools noise—and live inside the workspace so sandboxed coding agents can access them.
+Reports are readable Markdown, not raw DevTools noise, and live inside the workspace so sandboxed coding agents can access them.
 
 ## Install
 
@@ -102,7 +105,7 @@ The script packages the extension with `vsce` and installs the resulting `.vsix`
 Each click creates a cleanly named report. Captures older than 24 hours are removed automatically, and the `.pinpoint/` directory ignores its own contents so reports never pollute your commits.
 
 > [!NOTE]
-> Some agents' `@` file pickers do not autocomplete gitignored paths ([including Codex](https://github.com/openai/codex/issues/2952)). Paste the mention anyway—the path arrives as plain text and the agent can still read the file.
+> Some agents' `@` file pickers do not autocomplete gitignored paths ([including Codex](https://github.com/openai/codex/issues/2952)). Paste the mention anyway. The path arrives as plain text and the agent can still read the file.
 
 ## Built for the agent loop
 
