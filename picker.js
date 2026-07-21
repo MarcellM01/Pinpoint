@@ -1,5 +1,11 @@
 (() => {
   try {
+    // Grab the vendored modern-screenshot UMD bundle (evaluated just before this
+    // IIFE) and remove it from the page's global scope right away, on every
+    // path below, so nothing of ours lingers on the inspected page.
+    const modernScreenshot = globalThis.modernScreenshot;
+    delete globalThis.modernScreenshot;
+
     const KEY = '__pinpointPicker';
     if (globalThis[KEY]?.active) {
       globalThis[KEY].stop();
@@ -67,13 +73,18 @@
       return generic && (segments.length > 3 || segments.includes('*'));
     };
 
-    const matchedRules = (element) => {
+    // Walks every rule in every same-origin stylesheet, descending into
+    // @media blocks that currently apply, and keeps whichever rules satisfy
+    // `matches`. Shared by the plain-selector, pseudo-element, and
+    // interaction-state collectors below — they differ only in how a
+    // selector counts as a match.
+    const collectMatchingRules = (matches) => {
       const rules = [];
       const visit = (list) => {
         for (const rule of list) {
           try {
             if (rule.selectorText !== undefined) {
-              if (element.matches(rule.selectorText) && !isNoiseRule(rule.selectorText)) {
+              if (matches(rule.selectorText) && !isNoiseRule(rule.selectorText)) {
                 rules.push(rule);
               }
             } else if (rule.media) {
@@ -94,6 +105,94 @@
         }
       }
       return rules;
+    };
+
+    const matchedRules = (element) =>
+      collectMatchingRules((selectorText) => element.matches(selectorText));
+
+    // `element.matches()` throws on selectors containing a pseudo-element, so
+    // match the selector with the trailing `::before`/`::after` stripped off
+    // instead.
+    const PSEUDO_ELEMENT = /::?(before|after)\b/i;
+    const pseudoElementRules = (element, pseudo) =>
+      collectMatchingRules((selectorText) =>
+        selectorText.split(',').some((segment) => {
+          const trimmed = segment.trim();
+          const match = trimmed.match(PSEUDO_ELEMENT);
+          if (!match || match[1].toLowerCase() !== pseudo) return false;
+          const base = trimmed.slice(0, match.index).trim() || '*';
+          try {
+            return element.matches(base);
+          } catch {
+            return false;
+          }
+        })
+      );
+
+    // `:hover`/`:focus`/`:active` never match a static snapshot, so strip
+    // them out and test the rest of the selector instead. A rule still
+    // counts when the state pseudo-class sits on an ancestor compound (e.g.
+    // `.card:hover .title`) — that's genuinely useful context, and the
+    // original selector text in the output makes the distinction clear.
+    const STATE_PSEUDO = /:(hover|focus-visible|focus-within|focus|active)\b/gi;
+    const stateKey = (name) => (name === 'focus-visible' || name === 'focus-within' ? 'focus' : name);
+    const statesInSelector = (element, selectorText) => {
+      const states = new Set();
+      for (const segment of selectorText.split(',')) {
+        const trimmed = segment.trim();
+        const names = [...trimmed.matchAll(STATE_PSEUDO)].map((match) => match[1].toLowerCase());
+        if (!names.length) continue;
+        const stripped = trimmed.replace(STATE_PSEUDO, '').trim();
+        if (!stripped) continue;
+        try {
+          if (element.matches(stripped)) names.forEach((name) => states.add(stateKey(name)));
+        } catch {
+          // Invalid selector once the state pseudo-class is stripped.
+        }
+      }
+      return states;
+    };
+    const stateMatchedRules = (element) => {
+      const byState = {hover: [], focus: [], active: []};
+      const rules = collectMatchingRules(
+        (selectorText) => statesInSelector(element, selectorText).size > 0
+      );
+      for (const rule of rules) {
+        const declarations = splitDeclarations(rule.style.cssText);
+        if (!declarations.length) continue;
+        const formatted = formatRule(rule.selectorText, declarations);
+        for (const state of statesInSelector(element, rule.selectorText)) byState[state].push(formatted);
+      }
+      return byState;
+    };
+
+    // Same selector, different viewport: authored rules gated by an @media
+    // condition that isn't true right now, so a responsive edit doesn't miss
+    // them. Limited to top-level media blocks — nested @media/@supports
+    // combinations are rare enough not to be worth the extra traversal.
+    const otherBreakpointRules = (element) => {
+      const rules = [];
+      for (const sheet of document.styleSheets) {
+        try {
+          for (const rule of sheet.cssRules) {
+            if (!rule.media || matchMedia(rule.media.mediaText).matches) continue;
+            for (const inner of rule.cssRules) {
+              try {
+                if (inner.selectorText === undefined) continue;
+                if (!element.matches(inner.selectorText) || isNoiseRule(inner.selectorText)) continue;
+                const declarations = splitDeclarations(inner.style.cssText);
+                if (!declarations.length) continue;
+                rules.push(`@media ${rule.media.mediaText} { ${formatRule(inner.selectorText, declarations)} }`);
+              } catch {
+                // Unparseable selector.
+              }
+            }
+          }
+        } catch {
+          // Cross-origin stylesheet.
+        }
+      }
+      return rules.slice(0, 15);
     };
 
     // `selector { first-decl;\n  rest… }` — one rule per block, matching how
@@ -188,7 +287,31 @@
         return `${name}: ${value.trim() ? value : '(unset)'};`;
       });
 
-      return {matched, inherited, resolved: resolvedValues(element, computed), variables};
+      const pseudos = {};
+      for (const pseudo of ['before', 'after']) {
+        if (getComputedStyle(element, `::${pseudo}`).content === 'none') continue;
+        const declarations = pseudoElementRules(element, pseudo)
+          .map((rule) => {
+            const decls = splitDeclarations(rule.style.cssText);
+            return decls.length ? formatRule(rule.selectorText, decls) : null;
+          })
+          .filter(Boolean);
+        if (declarations.length) pseudos[pseudo] = declarations.slice(0, 20);
+      }
+
+      // The picker fires on click, so the mouse is still over the element and
+      // its real :hover rules are already caught by matchedRules() above —
+      // drop those so the :hover/:focus/:active section only adds what a
+      // static snapshot couldn't otherwise show.
+      const states = stateMatchedRules(element);
+      for (const key of Object.keys(states)) {
+        states[key] = states[key].filter((line) => !matched.includes(line));
+      }
+
+      return {
+        matched, inherited, resolved: resolvedValues(element, computed), variables,
+        pseudos, states, media: otherBreakpointRules(element)
+      };
     };
 
     // Diff the element's computed style against a pristine element of the same
@@ -268,6 +391,7 @@
         element: selectorSegment(element),
         path: selectorPath(element),
         url: location.href,
+        viewport: {width: innerWidth, height: innerHeight, devicePixelRatio: devicePixelRatio || 1},
         outerHTML: outerHTML.length > 60000
           ? `${outerHTML.slice(0, 60000)}\n<!-- truncated: element markup exceeds 60 KB -->`
           : outerHTML,
@@ -279,6 +403,26 @@
         },
         css: collectCss(element)
       };
+    };
+
+    // Rasterized in-page with the vendored library — there is no CDP or OS
+    // screenshot API reachable from a detached picker, so this walks the
+    // element's own subtree onto a canvas instead. Best effort: cross-origin
+    // assets without CORS, video/canvas content, and very large elements may
+    // render blank or get skipped outright; either way the text capture above
+    // has already succeeded.
+    const MAX_SCREENSHOT_AREA = 4000000;
+    const captureScreenshot = async (element, rect) => {
+      if (!modernScreenshot || rect.width * rect.height > MAX_SCREENSHOT_AREA) return null;
+      try {
+        return await modernScreenshot.domToPng(element, {
+          scale: Math.min(devicePixelRatio || 1, 2),
+          backgroundColor: null,
+          timeout: 8000
+        });
+      } catch {
+        return null;
+      }
     };
 
     const copyText = async (text) => {
@@ -374,11 +518,14 @@
       } finally {
         document.documentElement.style.setProperty('cursor', 'crosshair', 'important');
       }
+      payload.screenshot = await captureScreenshot(element, payload.rect);
       try {
         // Pinpoint's extension host watches the clipboard for this marker,
         // saves the payload to a temp file, and swaps in an @-mention.
         await copyText(`PINPOINT_CONTEXT:${JSON.stringify(payload)}`);
-        showToast(`Captured ${ref} — paste the @-mention into your agent`);
+        showToast(payload.screenshot
+          ? `Captured ${ref} + screenshot — paste into your agent`
+          : `Captured ${ref} — paste the @-mention into your agent`);
       } catch {
         try {
           await copyText(ref);

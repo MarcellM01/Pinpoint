@@ -31,14 +31,25 @@ const setArmed = (armed) =>
 
 const disarm = () => setArmed(false);
 
-function formatReport(payload) {
-  const {element, path: htmlPath, url, outerHTML, rect, css} = payload;
+function formatReport(payload, screenshotFile) {
+  const {element, path: htmlPath, url, viewport, outerHTML, rect, css} = payload;
   const lines = [
     `# ${element}`,
     '',
     'Element captured from the live page with Pinpoint.',
-    '',
+    ''
+  ];
+  if (screenshotFile) {
+    lines.push(
+      'Screenshot of the element as rendered, before its markup and styles below:',
+      '',
+      `![Screenshot of ${element}](${screenshotFile})`,
+      ''
+    );
+  }
+  lines.push(
     `- Page: ${url}`,
+    `- Viewport: ${viewport.width} × ${viewport.height} px, ${viewport.devicePixelRatio}x pixel ratio`,
     `- Rendered size: ${rect.width} × ${rect.height} px at (${rect.left}, ${rect.top})`,
     `- DOM path: ${htmlPath}`,
     '',
@@ -49,11 +60,17 @@ function formatReport(payload) {
     '```',
     '',
     '## Styles'
-  ];
+  );
   const section = (heading, body) =>
     lines.push('', `### ${heading}`, '', '```css', body.join('\n'), '```');
   if (css.matched.length) section('Matching rules, as authored', css.matched);
+  if (css.media.length) section('Other breakpoints (not currently active)', css.media);
+  if (css.states.hover.length) section(':hover', css.states.hover);
+  if (css.states.focus.length) section(':focus', css.states.focus);
+  if (css.states.active.length) section(':active', css.states.active);
   if (css.inherited.length) section('Inherited from ancestors', css.inherited);
+  if (css.pseudos.before) section('::before', css.pseudos.before);
+  if (css.pseudos.after) section('::after', css.pseudos.after);
   if (css.resolved.length) {
     section('Computed values that differ from the browser default', css.resolved);
   }
@@ -111,9 +128,17 @@ function writeContextFile(payload) {
   for (let counter = 2; fs.existsSync(filePath); counter++) {
     filePath = path.join(directory, `${name}-${counter}.md`);
   }
-  fs.writeFileSync(filePath, formatReport(payload), 'utf8');
+  // Screenshot shares the report's base name, so a numbered collision on one
+  // always numbers the other the same way.
+  let screenshotPath = null;
+  if (payload.screenshot) {
+    screenshotPath = filePath.replace(/\.md$/, '.png');
+    const base64 = payload.screenshot.slice(payload.screenshot.indexOf(',') + 1);
+    fs.writeFileSync(screenshotPath, Buffer.from(base64, 'base64'));
+  }
+  fs.writeFileSync(filePath, formatReport(payload, screenshotPath && path.basename(screenshotPath)), 'utf8');
   const mention = root ? path.relative(root, filePath).split(path.sep).join('/') : filePath;
-  return {filePath, mention};
+  return {filePath, mention, screenshotPath};
 }
 
 let clipboardWatcher;
@@ -142,10 +167,13 @@ function startClipboardWatcher() {
       const text = await vscode.env.clipboard.readText();
       if (text.startsWith(CLIPBOARD_MARKER)) {
         const payload = JSON.parse(text.slice(CLIPBOARD_MARKER.length));
-        const {mention} = writeContextFile(payload);
-        await vscode.env.clipboard.writeText(`@${mention}`);
+        const {mention, screenshotPath} = writeContextFile(payload);
+        const mentionText = `@${mention}`;
+        await vscode.env.clipboard.writeText(mentionText);
         vscode.window.setStatusBarMessage(
-          `Pinpoint: captured ${payload.element} — @${mention} copied, paste it into your chat`,
+          screenshotPath
+            ? `Pinpoint: captured ${payload.element} — ${mentionText} copied (with screenshot in the report), paste it into your chat`
+            : `Pinpoint: captured ${payload.element} — ${mentionText} copied, paste it into your chat`,
           5000
         );
       }
@@ -274,7 +302,10 @@ async function pickElement(context) {
   try {
     const session = await getBrowserSession();
     const pickerPath = vscode.Uri.joinPath(context.extensionUri, 'picker.js');
-    const pickerSource = fs.readFileSync(pickerPath.fsPath, 'utf8');
+    const vendorPath = vscode.Uri.joinPath(context.extensionUri, 'vendor', 'modern-screenshot.js');
+    // The vendored bundle sets globalThis.modernScreenshot; picker.js reads
+    // that reference (and deletes it) as the first thing it does.
+    const pickerSource = `${fs.readFileSync(vendorPath.fsPath, 'utf8')}\n${fs.readFileSync(pickerPath.fsPath, 'utf8')}`;
     const result = await evaluatePicker(session, pickerSource);
     const active = result.includes('PINPOINT_ACTIVE');
     setArmed(active);

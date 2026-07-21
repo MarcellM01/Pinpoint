@@ -40,7 +40,8 @@
     "frontend",
     "html",
     "selector",
-    "clipboard"
+    "clipboard",
+    "screenshot"
   ],
   "main": "./extension.js",
   "capabilities": {
@@ -93,11 +94,13 @@
   "files": [
     "extension.js",
     "picker.js",
+    "vendor",
     "resources",
     "README.md",
     "CHANGELOG.md",
     "SUPPORT.md",
     "SECURITY.md",
-    "LICENSE"
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
   ]
 }

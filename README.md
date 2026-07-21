@@ -31,7 +31,7 @@
 
 Your AI can read the code. It cannot see the element you are pointing at.
 
-Pinpoint closes that gap. Pick an element in the live page and it captures the exact selector, markup, dimensions, matched and inherited CSS, resolved values, and CSS variables. It writes everything to a small Markdown report and puts an `@.pinpoint/…` mention on your clipboard.
+Pinpoint closes that gap. Pick an element in the live page and it captures the exact selector, markup, dimensions, matched and inherited CSS, resolved values, and CSS variables — plus a screenshot of the element itself. It writes everything to a small Markdown report, screenshot included, and puts an `@.pinpoint/…` mention on your clipboard.
 
 Paste it into your AI chat. That's it.
 
@@ -64,8 +64,9 @@ The agent gets the evidence it needs without a screenshot scavenger hunt, a wall
 | Inherited CSS                   | Finds typography, color, and layout coming from ancestors              |
 | Resolved values                 | Sees what the browser computed, without hundreds of default properties |
 | CSS variables                   | Connects `var(--token)` references to their live values                |
+| Screenshot                      | Shows what the element actually looks like, not just its markup        |
 
-Reports are readable Markdown, not raw DevTools noise, and live inside the workspace so sandboxed coding agents can access them.
+Reports are readable Markdown, not raw DevTools noise, and live inside the workspace so sandboxed coding agents can access them. The screenshot is saved alongside the report and embedded in it, so it's there even if your paste target only takes text.
 
 ## Install
 
@@ -98,11 +99,11 @@ The script packages the extension with `vsce` and installs the resulting `.vsix`
 1. In VS Code, run **Browser: Open Integrated Browser** and load your app.
 2. Click the **inspect icon** in the browser tab's title bar.
 3. Hover over the page to preview selectors and dimensions.
-4. Click an element. Pinpoint creates a report such as `.pinpoint/weather-summary.md` and copies its `@` mention.
-5. Paste into any AI chat that can read files in your workspace.
+4. Click an element. Pinpoint creates a report such as `.pinpoint/weather-summary.md` plus a matching screenshot, and copies the report's `@` mention.
+5. Paste into any AI chat that can read files in your workspace — the mention links straight to the report, screenshot included.
 6. Keep clicking to capture more elements, or press <kbd>Esc</kbd> to stop.
 
-Each click creates a cleanly named report. Captures older than 24 hours are removed automatically, and the `.pinpoint/` directory ignores its own contents so reports never pollute your commits.
+Each click creates a cleanly named report and screenshot pair. Captures older than 24 hours are removed automatically, and the `.pinpoint/` directory ignores its own contents so reports never pollute your commits.
 
 > [!NOTE]
 > Some agents' `@` file pickers do not autocomplete gitignored paths ([including Codex](https://github.com/openai/codex/issues/2952)). Paste the mention anyway. The path arrives as plain text and the agent can still read the file.
@@ -115,14 +116,16 @@ Each click creates a cleanly named report. Captures older than 24 hours are remo
 - **Local by design.** Pinpoint itself makes no network requests. Captures stay in your workspace and clipboard.
 - **Low-noise output.** Universal resets and unchanged browser defaults are filtered out.
 - **Fast cleanup.** Reports expire automatically after one day.
+- **Best-effort screenshots.** The screenshot is rendered from the live DOM, not a real browser screenshot API — video, `<canvas>`, and cross-origin images without CORS headers may render blank, and very large elements skip the screenshot entirely. The rest of the capture is unaffected either way.
 
 ## Security and privacy
 
 - **No telemetry or accounts.** Pinpoint does not collect usage data and does not require a sign-in.
-- **No network requests.** The extension does not send captured content anywhere.
+- **No network requests.** The extension does not send captured content anywhere. Rendering the screenshot may cause the *page itself* to re-fetch its own already-displayed images and fonts (subject to the browser's normal cache) so they can be embedded in the image — nothing leaves the page's own security boundary, and nothing is sent by Pinpoint.
 - **User initiated.** Pinpoint attaches VS Code's JavaScript debugger only after you click its inspect icon, injects the picker, and disconnects immediately.
-- **Local output.** Reports are written to `.pinpoint/` in your workspace and their `@` mentions are copied to your clipboard.
-- **Sensitive content stays your responsibility.** A report can contain text, attributes, URLs, and styles rendered by the selected element. Review captures before sharing them outside your machine.
+- **Local output.** Reports and screenshots are written to `.pinpoint/` in your workspace, and the report's `@` mention is copied to your clipboard.
+- **Vendored screenshot renderer.** The in-page rendering code is a vendored, unmodified copy of the open-source [modern-screenshot](https://github.com/qq15725/modern-screenshot) library (MIT) — see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). It is bundled with the extension; nothing is fetched at install or run time.
+- **Sensitive content stays your responsibility.** A report can contain text, attributes, URLs, and styles rendered by the selected element, and the screenshot can contain anything visibly rendered on the page. Review captures before sharing them outside your machine.
 
 Read the [security policy](SECURITY.md) for vulnerability reporting and [support guide](SUPPORT.md) when something is not working.
 
