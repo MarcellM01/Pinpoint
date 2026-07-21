@@ -5,12 +5,12 @@
 <h1 align="center">Pinpoint</h1>
 
 <p align="center">
-  <strong>Click the bug. Paste the context. Let your AI fix the right thing.</strong>
+  <strong>Click the element. Paste the context. Let your AI fix the right thing.</strong>
 </p>
 
 <p align="center">
-  Turn any element in VS Code's Integrated Browser into clean, agent-readable<br>
-  HTML and CSS context with a single click.
+  The agent-agnostic frontend element picker for VS Code.<br>
+  Turn any element in the Integrated Browser into clean, agent-readable HTML and CSS context with a single click.
 </p>
 
 [![VS Marketplace Version](https://vsmarketplacebadges.dev/version-short/marcellm01.tinysuite-pinpoint.svg)](https://marketplace.visualstudio.com/items?itemName=marcellm01.tinysuite-pinpoint)
@@ -33,7 +33,7 @@ Your AI can read the code. It cannot see the element you are pointing at.
 
 Pinpoint closes that gap. Pick an element in the live page and it captures the exact selector, markup, dimensions, matched and inherited CSS, resolved values, and CSS variables — plus a screenshot of the element itself. It writes everything to a small Markdown report, screenshot included, and puts an `@.pinpoint/…` mention on your clipboard.
 
-Paste it into your AI chat. That's it.
+Paste it into whichever agent you're already running — GitHub Copilot Chat, Cline, Roo Code, Continue, opencode, Claude Code, Codex CLI. Pinpoint is a plain VS Code extension, not a forked editor, so it installs right alongside the one you use instead of asking you to switch. That's it.
 
 ## Stop describing. Start pointing.
 
@@ -100,7 +100,7 @@ The script packages the extension with `vsce` and installs the resulting `.vsix`
 2. Click the **inspect icon** in the browser tab's title bar.
 3. Hover over the page to preview selectors and dimensions.
 4. Click an element. Pinpoint creates a report such as `.pinpoint/weather-summary.md` plus a matching screenshot, and copies the report's `@` mention.
-5. Paste into any AI chat that can read files in your workspace — the mention links straight to the report, screenshot included.
+5. Paste into any agent that can read files in your workspace — Copilot Chat, Cline, Roo Code, Continue, opencode, Claude Code, Codex CLI, or otherwise — the mention links straight to the report, screenshot included.
 6. Keep clicking to capture more elements, or press <kbd>Esc</kbd> to stop.
 
 Each click creates a cleanly named report and screenshot pair. Captures older than 24 hours are removed automatically, and the `.pinpoint/` directory ignores its own contents so reports never pollute your commits.
@@ -110,7 +110,7 @@ Each click creates a cleanly named report and screenshot pair. Captures older th
 
 ## Built for the agent loop
 
-- **Agent-agnostic.** No per-chat integration. If the agent can read your workspace, Pinpoint works with it.
+- **Agent-agnostic.** Ships as a standard VS Code extension, not a forked editor, so it installs next to whatever you already run — Copilot Chat, Cline, Roo Code, Continue, opencode, Claude Code, Codex CLI. No per-chat integration; if the agent can read your workspace, Pinpoint works with it.
 - **Prompt-efficient.** Rich DOM and CSS context stays in an attached file instead of flooding the conversation.
 - **Safe picking.** Pinpoint intercepts the click, so selecting a link, submit button, or delete button does not activate it.
 - **Local by design.** Pinpoint itself makes no network requests. Captures stay in your workspace and clipboard.

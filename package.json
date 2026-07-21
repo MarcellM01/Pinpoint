@@ -2,11 +2,10 @@
   "name": "tinysuite-pinpoint",
   "displayName": "Pinpoint: Copy Frontend Context for AI",
   "description": "Pick any frontend element in VS Code's Integrated Browser and capture its HTML and CSS context for AI coding agents.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "publisher": "marcellm01",
   "license": "MIT",
   "icon": "resources/icon.png",
-  "preview": true,
   "pricing": "Free",
   "galleryBanner": {
     "color": "#1F2328",
